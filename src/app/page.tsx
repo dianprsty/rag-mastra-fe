@@ -16,6 +16,7 @@ import {
   createChatThread,
   deleteChatThread,
   streamChatResponse,
+  deleteDocument,
   ModelOption,
   IngestedDocInfo,
   ChatThreadItem,
@@ -254,6 +255,16 @@ export default function Home() {
     }
   };
 
+  const handleDeleteDocument = async (docId: string) => {
+    try {
+      await deleteDocument(docId);
+      loadIngestedDocs();
+    } catch (err) {
+      console.error('Failed to delete document:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     loadModels();
     loadIngestedDocs();
@@ -313,6 +324,7 @@ export default function Home() {
                 documents={ingestedDocs}
                 isLoading={isLoadingDocs}
                 onOpenUploadModal={() => setIsIngestModalOpen(true)}
+                onDeleteDocument={handleDeleteDocument}
               />
             </div>
           )}

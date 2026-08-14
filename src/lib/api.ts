@@ -17,9 +17,10 @@ export interface IngestParams {
   text?: string;
   source: string;
   title?: string;
-  format?: 'markdown' | 'text' | 'pdf';
+  format?: 'markdown' | 'text' | 'pdf' | 'url';
   embeddingModel?: string;
   pdfBase64?: string;
+  url?: string;
 }
 
 export interface IngestResponse {
@@ -77,6 +78,15 @@ export async function fetchDocuments(): Promise<DocumentsResponse> {
   const res = await fetch(`${API_BASE_URL}/documents`);
   if (!res.ok) throw new Error('Failed to fetch documents');
   return res.json();
+}
+
+export async function deleteDocument(documentId: string): Promise<boolean> {
+  const res = await fetch(`${API_BASE_URL}/documents/${encodeURIComponent(documentId)}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete document');
+  const data = await res.json();
+  return data.success;
 }
 
 export interface ChatThreadItem {

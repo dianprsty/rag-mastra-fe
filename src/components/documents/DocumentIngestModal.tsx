@@ -38,17 +38,19 @@ export const DocumentIngestModal: React.FC<DocumentIngestModalProps> = ({
 
     let contentToIngest = text;
     let sourceId = source.trim() || title.trim() || `doc-${Date.now()}`;
+    let ingestionFormat: 'text' | 'markdown' | 'pdf' | 'url' = format;
 
     if (activeTab === 'url') {
       if (!url.trim()) {
         setStatusMsg({ type: 'error', text: 'Please enter a valid URL' });
         return;
       }
-      contentToIngest = `Document content ingested from URL: ${url}`;
-      sourceId = url;
+      contentToIngest = '';
+      sourceId = url.trim();
+      ingestionFormat = 'url';
     }
 
-    if (!contentToIngest.trim() && !pdfBase64) {
+    if (activeTab !== 'url' && !contentToIngest.trim() && !pdfBase64) {
       setStatusMsg({ type: 'error', text: 'Please select a file or provide text to ingest' });
       return;
     }
@@ -60,9 +62,10 @@ export const DocumentIngestModal: React.FC<DocumentIngestModalProps> = ({
         text: contentToIngest,
         source: sourceId,
         title: title || sourceId,
-        format,
+        format: ingestionFormat,
         embeddingModel: selectedEmbeddingModel,
-        pdfBase64: format === 'pdf' ? pdfBase64 : undefined,
+        pdfBase64: ingestionFormat === 'pdf' && activeTab === 'file' ? pdfBase64 : undefined,
+        url: activeTab === 'url' ? url.trim() : undefined,
       });
 
       setStatusMsg({

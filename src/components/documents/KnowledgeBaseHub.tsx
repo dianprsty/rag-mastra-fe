@@ -12,6 +12,7 @@ import {
   Eye,
   ChevronRight,
   Database,
+  Trash2,
 } from 'lucide-react';
 import { IngestedDocInfo } from '@/lib/api';
 
@@ -19,16 +20,30 @@ interface KnowledgeBaseHubProps {
   documents: IngestedDocInfo[];
   isLoading: boolean;
   onOpenUploadModal: () => void;
+  onDeleteDocument: (documentId: string) => Promise<void>;
 }
 
 export const KnowledgeBaseHub: React.FC<KnowledgeBaseHubProps> = ({
   documents,
   isLoading,
   onOpenUploadModal,
+  onDeleteDocument,
 }) => {
   const [selectedDoc, setSelectedDoc] = useState<IngestedDocInfo | null>(
     documents[0] || null
   );
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (selectedDoc) {
+      const exists = documents.some((d) => (d.id || d.source) === (selectedDoc.id || selectedDoc.source));
+      if (!exists) {
+        setSelectedDoc(documents[0] || null);
+      }
+    } else if (documents.length > 0) {
+      setSelectedDoc(documents[0]);
+    }
+  }, [documents]);
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row gap-6 h-full min-w-0 overflow-hidden">
@@ -128,6 +143,25 @@ export const KnowledgeBaseHub: React.FC<KnowledgeBaseHubProps> = ({
                 <p className="text-xs font-mono text-gray-400 mt-0.5">Source: {selectedDoc.source}</p>
               </div>
 
+              <button
+                disabled={isDeleting}
+                onClick={async () => {
+                  if (confirm(`Are you sure you want to delete "${selectedDoc.title}"?`)) {
+                    setIsDeleting(true);
+                    try {
+                      await onDeleteDocument(selectedDoc.id || selectedDoc.source);
+                    } catch (err) {
+                      alert('Failed to delete document');
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white font-semibold text-xs transition cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isDeleting ? 'Deleting...' : 'Delete Document'}</span>
+              </button>
             </div>
 
 
